@@ -1,8 +1,7 @@
 import { afterAll, describe, expect, it } from "vitest";
+import { getTestDatabaseUrl } from "@/lib/test-database";
 
-const testDatabaseUrl =
-  process.env.TEST_DATABASE_URL ??
-  "postgresql://postgres:postgres@127.0.0.1:5432/jobsearch_test?schema=public";
+const testDatabaseUrl = getTestDatabaseUrl(process.env.TEST_DATABASE_URL);
 
 process.env.DATABASE_URL = testDatabaseUrl;
 
