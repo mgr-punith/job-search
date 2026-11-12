@@ -3,20 +3,23 @@
 import { useActionState } from "react";
 
 import { signupAction } from "@/features/auth/actions/auth-actions";
-import { FormMessage, TextField } from "@/features/auth/components/form-fields";
+import { FormMessage, TextField, useAuthErrorFocus } from "@/features/auth/components/form-fields";
 import { SubmitButton } from "@/features/auth/components/submit-button";
 
 export function SignupForm({ callbackUrl }: { callbackUrl: string }) {
   const [state, formAction] = useActionState(signupAction, null);
+  const formRef = useAuthErrorFocus(state);
+  const values = state && !state.ok ? state.values : undefined;
 
   const fieldError = (field: string) =>
     state && !state.ok ? state.fieldErrors?.[field]?.[0] : undefined;
 
   return (
-    <form action={formAction} className="space-y-3 sm:space-y-4">
+    <form ref={formRef} action={formAction} className="space-y-3 sm:space-y-4">
       <input name="callbackUrl" type="hidden" value={callbackUrl} />
       <TextField
         autoComplete="name"
+        defaultValue={values?.name}
         error={fieldError("name")}
         id="signup-name"
         label="Full name"
@@ -24,6 +27,7 @@ export function SignupForm({ callbackUrl }: { callbackUrl: string }) {
       />
       <TextField
         autoComplete="email"
+        defaultValue={values?.email}
         error={fieldError("email")}
         id="signup-email"
         label="Email"

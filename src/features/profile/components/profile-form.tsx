@@ -59,7 +59,10 @@ export function ProfileForm({ initialValues, email, availableSkills }: {
   }
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-5" onSubmit={(event) => {
+    <form ref={formRef} action={formAction} className="space-y-5" onReset={(event) => {
+      // React Actions reset native selects and checkboxes even when their state is controlled.
+      event.preventDefault();
+    }} onSubmit={(event) => {
       const result = profileSchema.safeParse(values);
       if (!result.success) {
         event.preventDefault();

@@ -200,3 +200,41 @@ Browser verification used a separate test candidate and a generated sample PDF, 
 ### Milestone boundary
 
 The three assignment flows now work locally. M6 remains the final review, accessibility/responsive checks, remaining test gaps, README polish and CI. M7 covers deployment to Vercel with Neon and the deployed demo check.
+
+## M6: Verification, accessibility, and CI, 2026-11-12
+
+### Tool and fit
+
+Codex used Chrome DevTools for real browser flows, responsive checks, Lighthouse snapshots, network/console inspection, and a performance trace. Vitest, ESLint, TypeScript, the Next.js production build, and PostgreSQL supplied repeatable code and data checks. GPT-6.1-sol performed the final focused review.
+
+### Prompt and constraints
+
+> [SUBMISSION EXAMPLE] okay do the testing in all way with chrome devtool and dont ask permission for dev testing
+
+The prompt authorised broad local development testing. Earlier instructions limited scope to registration/login/profile, job discovery, and applications/status tracking; authorised commit and push through M6; required local PostgreSQL for tests and Neon only for production; and prohibited secrets in Git. The stop condition was a reviewed, documented, verified, pushed M6 before deployment.
+
+### Output and decisions
+
+GitHub Actions now starts PostgreSQL 17, creates isolated development and test databases, installs the locked dependency tree, generates Prisma, deploys migrations, seeds fixtures, and runs lint, typecheck, all tests, and the production build. The workflow uses fixture-only environment values and grants read-only repository permissions.
+
+The app now sends basic browser security headers. Authentication failures retain non-secret form values and move focus to the first field error or generic alert. Profile saves prevent React's native Action reset from clearing controlled selects and checkboxes. Standalone job details use a sequential h1/h2 heading structure, while the desktop detail pane keeps its h2/h3 structure. Regression tests cover the authentication result values and both job-detail heading modes.
+
+### Issues and debugging
+
+Chrome reproduced an authentication bug: a failed Action submission cleared the name and email because React resets uncontrolled fields after a resolved form Action. The Action now returns bounded name/email values without passwords, the inputs use those values as defaults, and an effect restores useful error focus.
+
+Profile saves had a related visual reset. PostgreSQL stored the selected experience, skills, and market, but React reset the native controls immediately after the successful Action. Preventing the form reset keeps the controlled state on screen; reload confirmed that the saved database state matches it.
+
+Lighthouse found skipped heading levels on standalone job detail pages. The shared detail component now chooses section heading levels from its page context. The fixed mobile page scores 100 in the Lighthouse accessibility snapshot.
+
+The first local production upload test reported client completion without a saved profile file because UploadThing's production callback cannot reach localhost. Codex reran the journey on Next.js development mode, which uses UploadThing's supported development callback relay. Real upload, replacement, removal, and application snapshot retention then completed successfully.
+
+### Review and testing
+
+All 156 tests in 28 files pass. ESLint reports zero warnings, strict TypeScript passes, and the production build completes. Browser testing covered invalid and valid authentication, protected redirects, profile validation/save/reload, skill search/deselection, file validation, real UploadThing operations, combined and empty job searches, pagination and Back behavior, missing jobs, successful and duplicate applications, ownership, snapshot retention, and lazy status progression through interview.
+
+The tested pages had no horizontal overflow at 320, 390, 768, or 1280 pixels. Lighthouse snapshots scored 100 across accessibility, best practices, SEO, and agentic browsing on jobs, profile, and the fixed detail page. A cold local development trace measured 1.31-second LCP and 0.00 CLS. Console and first-party network checks were clean on the critical journey. `docs/QA_REPORT.md` records evidence and limits, including the lack of a committed screenshot baseline and the existing UploadThing/Effect audit advisories.
+
+### Milestone boundary
+
+M6 completes local hardening and CI. M7 remains deployment with Neon and production environment variables, followed by the deployed demo check and final submission links.

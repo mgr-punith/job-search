@@ -42,6 +42,8 @@ describe("runSignupAction", () => {
       },
     });
     expect(dependencies.signUp).not.toHaveBeenCalled();
+    expect(result).toHaveProperty("values", { name: "J", email: "invalid-email" });
+    expect(JSON.stringify(result)).not.toContain('"short"');
   });
 
   it("normalizes credentials and returns a safe callback", async () => {
@@ -82,6 +84,7 @@ describe("runSignupAction", () => {
     expect(result).toEqual({
       ok: false,
       error: "We could not create your account. Check your details and try again.",
+      values: { name: "Jordan Lee", email: "jordan@example.com" },
     });
   });
 
@@ -102,6 +105,7 @@ describe("runSignupAction", () => {
     expect(result).toEqual({
       ok: false,
       error: "Your account was created, but profile setup failed. Log in to try again.",
+      values: { name: "Jordan Lee", email: "jordan@example.com" },
     });
   });
 });
@@ -120,6 +124,7 @@ describe("runLoginAction", () => {
     expect(result).toEqual({
       ok: false,
       error: "Email or password is incorrect.",
+      values: { email: "candidate@example.com" },
     });
   });
 
