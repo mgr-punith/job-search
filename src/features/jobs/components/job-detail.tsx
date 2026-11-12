@@ -1,5 +1,6 @@
 import { BriefcaseBusiness, Building2, CircleDollarSign, Clock3, MapPin } from "lucide-react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
 import type { JobDetailData } from "@/features/jobs/queries/jobs";
@@ -10,7 +11,7 @@ function DetailSection({ title, items }: { title: string; items: string[] }) {
   return <section className="mt-7"><h3 className="font-semibold">{title}</h3><ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-muted-foreground">{items.map((item) => <li key={item}>{item}</li>)}</ul></section>;
 }
 
-export function JobDetail({ job, standalone = false }: { job: JobDetailData; standalone?: boolean }) {
+export function JobDetail({ job, standalone = false, applyPanel, matchScore }: { job: JobDetailData; standalone?: boolean; applyPanel: ReactNode; matchScore?: number }) {
   const Heading = standalone ? "h1" : "h2";
   return (
     <article className="rounded-xl border bg-card p-5 sm:p-7" aria-label={`${job.title} details`}>
@@ -25,6 +26,8 @@ export function JobDetail({ job, standalone = false }: { job: JobDetailData; sta
         <div className="flex gap-2.5"><dt className="shrink-0"><Clock3 aria-hidden="true" className="size-4" /><span className="sr-only">Time zone</span></dt><dd>{job.timeZone}</dd></div>
       </dl>
       <section className="mt-6"><h3 className="text-sm font-semibold">Skills</h3><ul className="mt-2 flex flex-wrap gap-2">{job.skills.map(({ skill }) => <li key={skill.name} className="rounded-md bg-muted px-2.5 py-1 text-xs">{skill.name}</li>)}</ul></section>
+      {matchScore !== undefined && <p className="mt-4 text-sm text-muted-foreground">Your profile match: <strong className="text-foreground">{matchScore}%</strong></p>}
+      <div className="mt-6">{applyPanel}</div>
       <section className="mt-7 border-t pt-6"><h3 className="font-semibold">About the job</h3><p className="mt-3 text-sm leading-7 text-muted-foreground">{job.about}</p></section>
       <DetailSection title="Responsibilities" items={job.responsibilities} />
       <DetailSection title="Ideal profile" items={job.idealProfile} />

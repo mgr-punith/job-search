@@ -24,6 +24,7 @@ export async function saveProfileAction(_state: ProfileActionResult | null, form
   if (result.ok) {
     revalidatePath("/profile");
     revalidatePath("/dashboard");
+    revalidatePath("/jobs", "layout");
   }
   return result;
 }

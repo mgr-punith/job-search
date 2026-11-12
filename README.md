@@ -2,7 +2,7 @@
 
 Candidate job portal built with Next.js App Router, TypeScript, Tailwind, shadcn/ui, Prisma, PostgreSQL, and Better Auth.
 
-Registration, login, logout, profile editing, skill selection, resume uploads, and job discovery are implemented. Applications and simulated status tracking are next in M5.
+The three assignment flows are implemented: candidate accounts/profiles, searchable jobs, and applications with simulated status tracking.
 
 ## Local setup
 
@@ -14,7 +14,7 @@ Use Node.js 24 or newer and Docker Compose.
 4. Run `npm run db:migrate` and `npm run db:seed`.
 5. Run `npm run dev` and open `http://localhost:3000`.
 
-`DATABASE_URL` connects to local PostgreSQL for development. `TEST_DATABASE_URL` must use the dedicated local `jobsearch_test` database. `BETTER_AUTH_SECRET` signs sessions; `BETTER_AUTH_URL` must match the browser's origin exactly, including the port. `UPLOADTHING_TOKEN` enables resume storage. `DEMO_STATUS_DELAY_SECONDS` configures the later simulated status engine.
+`DATABASE_URL` connects to local PostgreSQL for development. `TEST_DATABASE_URL` must use the dedicated local `jobsearch_test` database. `BETTER_AUTH_SECRET` signs sessions; `BETTER_AUTH_URL` must match the browser's origin exactly, including the port. `UPLOADTHING_TOKEN` enables resume storage. `DEMO_STATUS_DELAY_SECONDS` controls the time between simulated application transitions (1–86,400 seconds; 30 if omitted).
 
 ## Resume upload setup
 
@@ -58,7 +58,18 @@ Searches and filters live in the URL. Dropdown changes submit the current search
 
 On desktop, select a job card to change the detail panel. On mobile, the card opens a separate detail page with a **Back to jobs** link that retains your filters. Try `React` with `Senior level` for the Northstar Labs role, and a nonexistent keyword for the empty state. Direct links to missing or closed jobs show an unavailable message.
 
-Applying, match badges, and application timelines belong to M5; job details currently link to profile preparation.
+## Apply and track progress
+
+1. Log in, complete your profile, and upload a resume.
+2. Open a job and choose **Apply now**. The server saves the current resume URL/key and computes the match score; you cannot apply to the same job twice.
+3. The application page shows the submitted resume and a status timeline. **Dashboard** lists your applications, six per page.
+4. Leave the page open to see scheduled status changes, or select **Refresh status**. Reloading after several steps records all missed transitions once. Profile changes later do not change an application's stored score or resume.
+
+The matching function awards up to 70 points for the fraction of required skills matched; 20 for meeting/exceeding the experience level, 10 for being one level below, otherwise 0; 5 for the same country or explicitly worldwide remote work; and 5 for a matching preferred market. It rounds the total to a whole percentage. No listed job skills earns zero skill points. Both the job badge and application use this function.
+
+Scores of 90% or more progress from **Applied → Under review → Shortlisted → Interview scheduled**, one configured delay per transition. Lower scores stay **Under review**, as chosen for this assignment. The demo interview date is deterministic from the application id, four to six days after submission. This is a simulation; no real recruiter or meeting is involved. The app advances status on page reads and refreshes, without a cron job or queue.
+
+For a repeatable 100% example, use Senior experience, country United States, preferred market Healthcare, and skills TypeScript, React, Node.js, PostgreSQL, and Prisma. Apply to **MediSpring — Full Stack Engineer** after uploading a resume. Try **WellNest Health — Implementation Specialist** with that same profile to see the lower-score path. Use a fresh candidate for repeated demos because duplicate applications are blocked.
 
 ## Deployment
 
