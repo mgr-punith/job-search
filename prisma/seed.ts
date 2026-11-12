@@ -2,6 +2,7 @@ import "dotenv/config";
 
 import { PrismaPg } from "@prisma/adapter-pg";
 
+import { buildCredentialAccountData } from "../src/features/auth/services/credential.ts";
 import {
   CompanySize,
   ExperienceLevel,
@@ -10,6 +11,9 @@ import {
   PrismaClient,
   WorkplaceType,
 } from "../src/generated/prisma/client.ts";
+
+const DEMO_CANDIDATE_EMAIL = "demo.candidate@example.com";
+const DEMO_CANDIDATE_PASSWORD = "JobSearchDemo123!";
 
 type CompanySeed = {
   slug: string;
@@ -1201,15 +1205,31 @@ async function seed() {
     }
 
     const demoUser = await db.user.upsert({
-      where: { email: "demo.candidate@example.com" },
+      where: { email: DEMO_CANDIDATE_EMAIL },
       create: {
         name: "Jordan Lee",
-        email: "demo.candidate@example.com",
+        email: DEMO_CANDIDATE_EMAIL,
         emailVerified: false,
       },
       update: {
         name: "Jordan Lee",
       },
+    });
+
+    const demoCredential = await buildCredentialAccountData(
+      demoUser.id,
+      DEMO_CANDIDATE_PASSWORD,
+    );
+
+    await db.account.upsert({
+      where: {
+        providerId_accountId: {
+          providerId: demoCredential.providerId,
+          accountId: demoCredential.accountId,
+        },
+      },
+      create: demoCredential,
+      update: { password: demoCredential.password },
     });
 
     await db.candidateProfile.upsert({
@@ -1258,7 +1278,7 @@ async function seed() {
         db.job.count({ where: { slug: { in: jobs.map(({ slug }) => slug) } } }),
         db.skill.count({ where: { slug: { in: skills.map(([slug]) => slug) } } }),
         db.benefit.count({ where: { slug: { in: benefits.map(([slug]) => slug) } } }),
-        db.user.count({ where: { email: "demo.candidate@example.com" } }),
+        db.user.count({ where: { email: DEMO_CANDIDATE_EMAIL } }),
       ]);
 
     console.info(
