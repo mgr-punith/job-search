@@ -38,13 +38,13 @@ export default async function DashboardPage() {
             Your candidate account is ready. This is where you will manage your
             profile and follow your applications.
           </p>
-          <Link href="/profile" className="inline-flex rounded-lg bg-primary px-5 py-3 text-sm font-medium text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2">Edit my profile</Link>
+          <div className="flex flex-wrap gap-3"><Link href="/jobs" className="inline-flex rounded-lg bg-primary px-5 py-3 text-sm font-medium text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2">Browse jobs</Link><Link href="/profile" className="inline-flex rounded-lg border bg-card px-5 py-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2">Edit my profile</Link></div>
         </div>
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
           {[
             ["Profile", "Account created"],
             ["Applications", "No applications yet"],
-            ["Jobs", "Job listings coming soon"],
+            ["Jobs", "Explore open roles with search and filters"],
           ].map(([label, value]) => (
             <article className="rounded-xl border bg-card p-5 shadow-sm" key={label}>
               <div className="flex items-center justify-between gap-4">

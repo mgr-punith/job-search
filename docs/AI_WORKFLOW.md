@@ -126,3 +126,37 @@ The existing seed uses UTC offsets such as `UTC-05:00`. A browser check exposed 
 ### Review and testing
 
 All 88 tests, lint, strict TypeScript, and the production build pass. M3 tests cover profile constraints, invalid skills, owner-scoped mutations, database persistence, resume validation, upload middleware/callback behavior, and preservation of submitted resume snapshots. Browser verification confirmed editing and saving the demo profile, skills surviving reload, no horizontal overflow at 390px and 1280px, and anonymous profile access redirecting to login. Generated sample PDFs uploaded through the real UploadThing service, opened with HTTP 200 and the correct PDF content, and were replaced and removed through the profile controls. The focused reviewer found one MIME issue that Codex fixed with regression coverage; no other flow-blocking issues were reported.
+
+## M4: Job discovery, 2026-11-12
+
+### Tool and fit
+
+Codex built and verified job discovery using the existing Next.js, Prisma, Zod, Tailwind, shadcn, and Vitest setup. GPT-6.1-sol provided a focused independent review. No dependencies or schema changes were needed.
+
+### Prompt and constraints
+
+> okay commit , push and move to next phase
+
+The prompt authorised committing M3 and advancing the approved plan to M4. Context came from AGENTS.md, the design reference, and the existing 40-job seed. Earlier instructions prioritised assignment logic, local PostgreSQL, short feedback cycles, and keeping real environment files out of Git. The expected output was working search and filters with a responsive detail view; the stop condition was verified M4 completion before applications in M5.
+
+### Output
+
+Public `/jobs` and `/jobs/[slug]` routes provide keyword search across titles, companies and skills, plus location/country/time-zone search. Experience, company, job type, salary, market and benefit filters compose on the server. Zod normalises each URL parameter independently; invalid values fall back safely. Salary ranges overlap the job's advertised annual USD range. Pagination shows eight jobs per page, ordered by last update with a stable id tie-break, and redirects requests beyond the final page.
+
+The UI follows the reference's teal hero, search bar, dropdown row, job cards, desktop detail panel and simple CTA/footer. Mobile cards open their own detail page. URLs preserve filters during selection, pagination, reload and Back navigation. Only filter and navigation controls are client components. Active-job queries select only display fields; database access remains outside components. Loading, empty, error and missing-job states are present. Home, dashboard and candidate navigation now link to discovery.
+
+### Issues and debugging
+
+Browser inspection found that seeded locations already included their country, producing repeated text such as “Sydney, Australia, Australia.” A shared formatter fixes this, with regression coverage for full locations, city-only locations and remote regions. Visual review also found inherited white text on the light logout button; its wrapper now restores the foreground colour.
+
+The first production build exposed an undersized local auth secret. At the user's explicit request, Codex ran a local script to generate a random replacement and update only that setting in `.env`, preserving other settings without displaying values. Git ignore checks confirmed that `.env` stayed untracked. The build then passed with the local configuration.
+
+### Review and testing
+
+All 112 Vitest tests, lint, strict TypeScript and the production build pass. M4 coverage includes URL validation, combined filter mapping, literal wildcard searches, salary overlap, URL preservation, pagination bounds and location formatting. Real PostgreSQL tests in the dedicated `jobsearch_test` database verify combined filters, title/company/skill and time-zone searches, stable pagination, out-of-range pages, active-only details and filter choices. Tests clean up their own fixtures.
+
+Browser checks confirmed anonymous discovery, React skill search, the React + Senior combination, empty results, filter persistence after reload, desktop selection and browser Back, pagination with a retained job-type filter, and mobile detail/back navigation. The 390px and 1280px layouts had no horizontal overflow. The focused review found no remaining functional blockers, and the checked browser route reported no console warnings or errors.
+
+### Milestone boundary
+
+M4 completes discovery. Applying, match scoring, the shared match badge and simulated status timelines remain M5. CI remains M6; deployment with Neon remains M7. Existing UploadThing dependency advisories remain documented rather than expanding M4 into unrelated changes.

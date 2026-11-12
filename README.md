@@ -2,7 +2,7 @@
 
 Candidate job portal built with Next.js App Router, TypeScript, Tailwind, shadcn/ui, Prisma, PostgreSQL, and Better Auth.
 
-Registration, login, logout, profile editing, skill selection, and resume uploads are implemented. Job discovery and applications are the next milestones.
+Registration, login, logout, profile editing, skill selection, resume uploads, and job discovery are implemented. Applications and simulated status tracking are next in M5.
 
 ## Local setup
 
@@ -49,6 +49,16 @@ DATABASE_URL='postgresql://postgres:postgres@127.0.0.1:5432/jobsearch_test?schem
 ```
 
 Development uses Turbopack. Production builds use Next.js's webpack option because of local worker restrictions. No end-to-end test dependency is required.
+
+## Verify job discovery
+
+Open `/jobs` without logging in. The seed supplies 40 roles across 10 companies. Search by title, company, or skill; combine that with a city, country, or time-zone offset such as `UTC+05:30`. Choose experience level, company, job type, salary, market, or benefits to narrow the results. Salary filters match overlapping annual USD ranges.
+
+Searches and filters live in the URL. Dropdown changes submit the current search and reset pagination. Results show eight jobs per page, ordered by last update, with stable ties. Reload or use the browser's Back button to restore a search; **Clear** returns to all jobs.
+
+On desktop, select a job card to change the detail panel. On mobile, the card opens a separate detail page with a **Back to jobs** link that retains your filters. Try `React` with `Senior level` for the Northstar Labs role, and a nonexistent keyword for the empty state. Direct links to missing or closed jobs show an unavailable message.
+
+Applying, match badges, and application timelines belong to M5; job details currently link to profile preparation.
 
 ## Deployment
 

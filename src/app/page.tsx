@@ -18,8 +18,8 @@ export default function HomePage() {
           profile, job search, and application progress.
         </p>
         <div className="flex flex-wrap gap-3 pt-2">
-          <Link className={cn(buttonVariants({ size: "lg" }))} href="/signup">
-            Create account
+          <Link className={cn(buttonVariants({ size: "lg" }))} href="/jobs">
+            Find jobs
           </Link>
           <Link
             className={cn(buttonVariants({ size: "lg", variant: "outline" }))}
@@ -27,6 +27,7 @@ export default function HomePage() {
           >
             Log in
           </Link>
+          <Link className={cn(buttonVariants({ size: "lg", variant: "ghost" }))} href="/signup">Create account</Link>
         </div>
       </section>
     </main>
