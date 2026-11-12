@@ -25,3 +25,18 @@ export function parseServerEnvironment(
 ): ServerEnvironment {
   return serverEnvironmentSchema.parse(environment);
 }
+
+const uploadEnvironmentSchema = z.object({
+  UPLOADTHING_TOKEN: z.string().trim().min(1).refine(
+    (value) => !value.startsWith("replace-") && !value.startsWith("YOUR_"),
+    "Configure UPLOADTHING_TOKEN to enable resume uploads",
+  ),
+});
+
+export function parseUploadEnvironment(environment: NodeJS.ProcessEnv) {
+  return uploadEnvironmentSchema.parse(environment);
+}
+
+export function isResumeUploadConfigured() {
+  return uploadEnvironmentSchema.safeParse(process.env).success;
+}

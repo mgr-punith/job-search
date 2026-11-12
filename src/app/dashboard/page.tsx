@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { LogoutButton } from "@/features/auth/components/logout-button";
+import { CandidateHeader } from "@/components/shared/candidate-header";
 import { getLoginUrl } from "@/features/auth/services/auth-routing";
 import { ensureCandidateProfile } from "@/features/auth/services/candidate-profile";
 import { auth } from "@/lib/auth";
@@ -25,14 +25,7 @@ export default async function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-muted/35">
-      <header className="border-b bg-background">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link className="text-lg font-semibold tracking-tight" href="/">
-            JobSearch
-          </Link>
-          <LogoutButton />
-        </div>
-      </header>
+      <CandidateHeader current="dashboard" />
       <section className="mx-auto max-w-6xl px-6 py-14">
         <div className="max-w-3xl space-y-5">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">
@@ -45,6 +38,7 @@ export default async function DashboardPage() {
             Your candidate account is ready. This is where you will manage your
             profile and follow your applications.
           </p>
+          <Link href="/profile" className="inline-flex rounded-lg bg-primary px-5 py-3 text-sm font-medium text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2">Edit my profile</Link>
         </div>
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
           {[
