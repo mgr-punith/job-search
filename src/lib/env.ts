@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { DEFAULT_STATUS_DELAY_SECONDS } from "@/features/applications/constants";
+
 const postgresUrlSchema = z.string().url().refine(
   (value) => {
     if (!URL.canParse(value)) {
@@ -39,4 +41,12 @@ export function parseUploadEnvironment(environment: NodeJS.ProcessEnv) {
 
 export function isResumeUploadConfigured() {
   return uploadEnvironmentSchema.safeParse(process.env).success;
+}
+
+const simulationEnvironmentSchema = z.object({
+  DEMO_STATUS_DELAY_SECONDS: z.coerce.number().int().min(1).max(86_400).default(DEFAULT_STATUS_DELAY_SECONDS),
+});
+
+export function parseSimulationEnvironment(environment: Record<string, string | undefined>) {
+  return simulationEnvironmentSchema.parse(environment);
 }

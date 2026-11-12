@@ -4,6 +4,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { CandidateHeader } from "@/components/shared/candidate-header";
+import { ApplicationDashboard } from "@/features/applications/components/application-dashboard";
+import { parseApplicationPage } from "@/features/applications/schemas/application";
 import { getLoginUrl } from "@/features/auth/services/auth-routing";
 import { ensureCandidateProfile } from "@/features/auth/services/candidate-profile";
 import { auth } from "@/lib/auth";
@@ -14,7 +16,7 @@ export const metadata: Metadata = {
 
 export const instant = false;
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session) {
@@ -22,11 +24,12 @@ export default async function DashboardPage() {
   }
 
   await ensureCandidateProfile(session.user.id);
+  const page = parseApplicationPage((await searchParams).page);
 
   return (
     <main className="min-h-screen bg-muted/35">
       <CandidateHeader current="dashboard" />
-      <section className="mx-auto max-w-6xl px-6 py-14">
+      <section className="mx-auto max-w-6xl px-5 py-9 sm:px-6">
         <div className="max-w-3xl space-y-5">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">
             Candidate dashboard
@@ -35,25 +38,11 @@ export default async function DashboardPage() {
             Welcome, {session.user.name}
           </h1>
           <p className="text-lg leading-8 text-muted-foreground">
-            Your candidate account is ready. This is where you will manage your
-            profile and follow your applications.
+            Find your next role and follow your applications in one place.
           </p>
           <div className="flex flex-wrap gap-3"><Link href="/jobs" className="inline-flex rounded-lg bg-primary px-5 py-3 text-sm font-medium text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2">Browse jobs</Link><Link href="/profile" className="inline-flex rounded-lg border bg-card px-5 py-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2">Edit my profile</Link></div>
         </div>
-        <div className="mt-10 grid gap-4 sm:grid-cols-3">
-          {[
-            ["Profile", "Account created"],
-            ["Applications", "No applications yet"],
-            ["Jobs", "Explore open roles with search and filters"],
-          ].map(([label, value]) => (
-            <article className="rounded-xl border bg-card p-5 shadow-sm" key={label}>
-              <div className="flex items-center justify-between gap-4">
-                <h2 className="font-semibold">{label}</h2>
-              </div>
-              <p className="mt-3 text-sm text-muted-foreground">{value}</p>
-            </article>
-          ))}
-        </div>
+        <ApplicationDashboard userId={session.user.id} page={page} />
       </section>
     </main>
   );

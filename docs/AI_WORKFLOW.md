@@ -160,3 +160,43 @@ Browser checks confirmed anonymous discovery, React skill search, the React + Se
 ### Milestone boundary
 
 M4 completes discovery. Applying, match scoring, the shared match badge and simulated status timelines remain M5. CI remains M6; deployment with Neon remains M7. Existing UploadThing dependency advisories remain documented rather than expanding M4 into unrelated changes.
+
+## M5: Applications, matching, and simulated tracking, 2026-11-12
+
+### Tool and fit
+
+Codex implemented the application service, pure matching/status rules, Server Action, and candidate dashboard. The existing TypeScript, Prisma, and Vitest setup let Codex test business rules and actual PostgreSQL transactions without adding packages. GPT-6.1-sol reviewed the implementation and its concurrency fix.
+
+### Prompt and constraints
+
+> okay continue next part
+
+This prompt advanced the approved milestone plan from M4 to M5. AGENTS.md supplied the application requirements; earlier instructions authorised branch commits and pushes through M6, prioritised the three assignment flows, and required local PostgreSQL for testing. The expected output was an end-to-end application flow with honest simulated tracking. The stop condition was a verified, pushed M5 before M6.
+
+Codex proposed keeping scores below 90% under review and a 70/20/5/5 weighting. The user confirmed: “Keep below 90% under review (Recommended).”
+
+### Output and decisions
+
+Candidates can apply from a job detail panel or page. The server authenticates the candidate, validates the job id, checks that the job is active and a resume exists, then stores a resume snapshot, computed score and initial event in one transaction. The existing database unique constraint blocks repeated applications, including concurrent submissions. A profile-row lock coordinates submission with resume replacement/removal. Job pages show login, missing-resume, pending, error and already-applied states.
+
+The pure match function gives 70 points times the fraction of required skills matched, 20 for meeting/exceeding the required experience or 10 for one level below, 5 for the same country or explicitly worldwide remote work, and 5 for a preferred market match. It rounds the sum to a whole percentage and gives no skill points when no required skills are listed. Job badges and submitted applications use this same function; submitted scores remain fixed after profile changes.
+
+The pure status function advances qualifying applications through Applied, Under review, Shortlisted and Interview scheduled. Scores below 90 stay under review. `DEMO_STATUS_DELAY_SECONDS` sets each delay; the code defaults to 30 seconds. The appointment is fixed from the application id at four to six days after submission. Page reads persist due transitions and missing events atomically; a conditional update prevents older requests from moving status backwards, and a unique event constraint prevents duplicates. A small client timer refreshes at the next due transition. No queue, cron job, external ATS, or real meeting is involved.
+
+The dashboard lists six owned applications per page with timelines. The application detail page shows the submitted resume and simulation notes. Reads and mutations scope ownership to the session user. The implementation adds loading, empty, unavailable and error states, plus profile-match badges on job cards.
+
+### Issues and debugging
+
+The focused review found a race between refreshes targeting different stages: if an earlier request advanced to Under review after a later request had read Applied, an exact-status conditional update could leave the later request behind. Codex reproduced this with a PostgreSQL integration test that interleaves the earlier transaction between the later read and write. The test failed with Under review instead of Interview scheduled. The fix accepts any earlier status in the derived timeline while still preventing regression; the test then passed and the reviewer confirmed the fix.
+
+Type checking also caught an environment-parser test signature that unnecessarily required `NODE_ENV`. The simulation parser now accepts a record of environment names and values, validating only its own setting.
+
+### Review and testing
+
+All 154 tests, lint, strict TypeScript and the production build pass. Coverage includes score weighting and the exact 90% boundary, configurable timing, deterministic interviews, skipped transitions, invalid input, session ownership, missing resumes, closed jobs, duplicate/concurrent application submissions, resume snapshot retention, concurrent refreshes, and pagination. Database tests use `jobsearch_test` and remove their own fixtures.
+
+Browser verification used a separate test candidate and a generated sample PDF, leaving the user's demo profile and resume intact. Signup, profile save, missing-resume guidance, actual UploadThing upload, and application submission worked. A 100% MediSpring application progressed automatically through all four stages with the local 60-second delay; a 25% WellNest application stayed under review. The submitted PDF returned HTTP 200 with valid PDF content. Returning to the job showed View application, and the list displayed the same 100% match badge. Anonymous application access redirected to login; another candidate saw Application not found without a timeline or resume. The dashboard showed both applications, and the application/dashboard pages had no horizontal overflow at 390px. Desktop rendering at 1280px and browser console checks also passed.
+
+### Milestone boundary
+
+The three assignment flows now work locally. M6 remains the final review, accessibility/responsive checks, remaining test gaps, README polish and CI. M7 covers deployment to Vercel with Neon and the deployed demo check.

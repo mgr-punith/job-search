@@ -8,6 +8,8 @@ const jobCardSelect = {
   workplaceType: true, jobType: true, experienceLevel: true,
   salaryMin: true, salaryMax: true, salaryCurrency: true,
   isActivelyRecruiting: true, publishedAt: true, updatedAt: true,
+  market: true,
+  skills: { select: { skillId: true }, take: 50, orderBy: { skillId: "asc" } },
   company: { select: { name: true, slug: true } },
 } satisfies Prisma.JobSelect;
 
@@ -16,7 +18,7 @@ const jobDetailSelect = {
   summary: true, about: true, responsibilities: true, idealProfile: true, whatsOnOffer: true,
   timeZone: true, market: true,
   company: { select: { name: true, slug: true, size: true, description: true } },
-  skills: { select: { skill: { select: { name: true } } }, orderBy: { skill: { name: "asc" } }, take: 50 },
+  skills: { select: { skillId: true, skill: { select: { name: true } } }, orderBy: { skill: { name: "asc" } }, take: 50 },
   benefits: { select: { benefit: { select: { name: true } } }, orderBy: { benefit: { name: "asc" } }, take: 30 },
 } satisfies Prisma.JobSelect;
 
