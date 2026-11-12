@@ -99,3 +99,30 @@ Codex seeded the development database twice with unchanged counts, then verified
 ### Scope and deployment notes
 
 The user prioritised the three assignment flows and authorised commits and branch pushes through M6, with no real env files included. Profile editing and uploads remain M3, job discovery M4, and applications/status tracking M5. CI is planned for M6; Vercel deployment with Neon is M7. Database-backed throttling depends on the production proxy supplying trustworthy client IP headers; confirm that configuration during deployment.
+
+## M3: Candidate profile and resume upload, 2026-11-12
+
+### Tool and fit
+
+Codex implemented the profile form, owner-scoped Prisma services, and UploadThing integration using the existing Next.js, Zod, and Vitest setup. The focus was the assignment's candidate flow. The user approved `uploadthing@7.7.4` and free-tier file storage after learning that file URLs are accessible to anyone holding them.
+
+### Prompt
+
+> [SUBMISSION EXAMPLE] okay move to next phase
+> tell me what i need to paste in env
+
+The prompt advanced the approved plan to M3 and requested setup guidance. Earlier instructions limited work to the three assignment requirements, local PostgreSQL for testing, Neon for production, and no real env files in Git. Codex supplied an env template with placeholders and step-by-step UploadThing setup guidance without requesting token values in chat.
+
+### Output
+
+The new `/profile` route edits name, headline, phone, location, country/time zone, experience, skills, bio, preferred markets, and work arrangements. A nested Prisma write saves name, profile fields, and skill selections together. Login identity determines which candidate can be read or changed; no client-supplied owner ID is used. Forms share Zod validation and retain entered values when validation fails.
+
+The resume section accepts one PDF/DOC/DOCX up to 4 MB and supports viewing, replacement, and removal. UploadThing middleware authenticates and validates before upload, and its verified callback stores metadata. Existing application resume snapshots survive later profile changes. Uploading uses the browser SDK from the single approved package, avoiding server request-size limits and a separate React package. Profile editing remains available without an upload token.
+
+### Issues and debugging
+
+The existing seed uses UTC offsets such as `UTC-05:00`. A browser check exposed that a validator accepting only IANA time zones would block saving an otherwise valid demo profile. A regression test now covers the seed format alongside IANA zones. Focused review also caught a missing browser MIME type reaching UploadThing as `blob`; the client now supplies the validated document MIME type while preserving file content. The npm sandbox could not resolve the registry; the approved installation succeeded with network permission. Its audit reports one moderate and three high production package entries in the Effect dependency chain; M3 records this limitation without forcing an incompatible downgrade.
+
+### Review and testing
+
+All 88 tests, lint, strict TypeScript, and the production build pass. M3 tests cover profile constraints, invalid skills, owner-scoped mutations, database persistence, resume validation, upload middleware/callback behavior, and preservation of submitted resume snapshots. Browser verification confirmed editing and saving the demo profile, skills surviving reload, no horizontal overflow at 390px and 1280px, and anonymous profile access redirecting to login. Generated sample PDFs uploaded through the real UploadThing service, opened with HTTP 200 and the correct PDF content, and were replaced and removed through the profile controls. The focused reviewer found one MIME issue that Codex fixed with regression coverage; no other flow-blocking issues were reported.
