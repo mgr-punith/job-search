@@ -1,0 +1,305 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ExperienceLevel {
+  ENTRY
+  MID
+  SENIOR
+  LEAD
+  EXECUTIVE
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  TEMPORARY
+  INTERNSHIP
+}
+
+enum WorkplaceType {
+  REMOTE
+  HYBRID
+  ON_SITE
+}
+
+enum CompanySize {
+  STARTUP
+  SMALL
+  MEDIUM
+  LARGE
+  ENTERPRISE
+}
+
+enum Market {
+  TECHNOLOGY
+  FINTECH
+  HEALTHCARE
+  ECOMMERCE
+  EDUCATION
+  MEDIA
+  PROFESSIONAL_SERVICES
+}
+
+enum ApplicationStatus {
+  APPLIED
+  UNDER_REVIEW
+  SHORTLISTED
+  INTERVIEW_SCHEDULED
+  NOT_SELECTED
+}
+
+model User {
+  id            String            @id @default(cuid())
+  name          String
+  email         String            @unique
+  emailVerified Boolean           @default(false)
+  image         String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  profile       CandidateProfile?
+  applications  Application[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@index([expiresAt])
+  @@map("verifications")
+}
+
+model RateLimit {
+  id          String @id @default(cuid())
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+
+  @@index([lastRequest])
+  @@map("rate_limits")
+}
+
+model CandidateProfile {
+  id                      String           @id @default(cuid())
+  userId                  String           @unique
+  headline                String?
+  phone                   String?
+  location                String?
+  country                 String?
+  timeZone                String?
+  yearsExperience         Int              @default(0)
+  experienceLevel         ExperienceLevel  @default(ENTRY)
+  bio                     String?
+  preferredMarkets        Market[]         @default([])
+  preferredWorkplaceTypes WorkplaceType[]  @default([])
+  resumeUrl               String?
+  resumeKey               String?          @unique
+  resumeName              String?
+  resumeMimeType          String?
+  resumeUploadedAt        DateTime?
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+  user                    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skills                  CandidateSkill[]
+
+  @@map("candidate_profiles")
+}
+
+model Company {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  name        String      @unique
+  description String
+  websiteUrl  String?
+  logoUrl     String?
+  size        CompanySize
+  location    String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  jobs        Job[]
+
+  @@map("companies")
+}
+
+model Skill {
+  id         String           @id @default(cuid())
+  slug       String           @unique
+  name       String           @unique
+  candidates CandidateSkill[]
+  jobs       JobSkill[]
+
+  @@map("skills")
+}
+
+model CandidateSkill {
+  candidateProfileId String
+  skillId            String
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  skill              Skill            @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([candidateProfileId, skillId])
+  @@index([skillId, candidateProfileId])
+  @@map("candidate_skills")
+}
+
+model Benefit {
+  id   String       @id @default(cuid())
+  slug String       @unique
+  name String       @unique
+  jobs JobBenefit[]
+
+  @@map("benefits")
+}
+
+model Job {
+  id                   String          @id @default(cuid())
+  companyId            String
+  slug                 String          @unique
+  title                String
+  summary              String
+  about                String
+  responsibilities     String[]
+  idealProfile         String[]
+  whatsOnOffer         String[]
+  location             String
+  country              String
+  timeZone             String
+  workplaceType        WorkplaceType
+  jobType              JobType
+  experienceLevel      ExperienceLevel
+  market               Market
+  salaryMin            Int
+  salaryMax            Int
+  salaryCurrency       String          @default("USD")
+  isActive             Boolean         @default(true)
+  isActivelyRecruiting Boolean         @default(false)
+  publishedAt          DateTime        @default(now())
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  company              Company         @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  skills               JobSkill[]
+  benefits             JobBenefit[]
+  applications         Application[]
+
+  @@index([isActive, updatedAt])
+  @@index([companyId, isActive, updatedAt])
+  @@index([experienceLevel, isActive, updatedAt])
+  @@index([jobType, isActive, updatedAt])
+  @@index([workplaceType, isActive, updatedAt])
+  @@index([market, isActive, updatedAt])
+  @@index([salaryMin, salaryMax])
+  @@index([country, timeZone])
+  @@map("jobs")
+}
+
+model JobSkill {
+  jobId   String
+  skillId String
+  job     Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([jobId, skillId])
+  @@index([skillId, jobId])
+  @@map("job_skills")
+}
+
+model JobBenefit {
+  jobId     String
+  benefitId String
+  job       Job     @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  benefit   Benefit @relation(fields: [benefitId], references: [id], onDelete: Cascade)
+
+  @@id([jobId, benefitId])
+  @@index([benefitId, jobId])
+  @@map("job_benefits")
+}
+
+model Application {
+  id          String                   @id @default(cuid())
+  userId      String
+  jobId       String
+  resumeUrl   String
+  resumeKey   String
+  resumeName  String?
+  matchScore  Int
+  status      ApplicationStatus        @default(APPLIED)
+  appliedAt   DateTime                 @default(now())
+  interviewAt DateTime?
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  user        User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job         Job                      @relation(fields: [jobId], references: [id], onDelete: Restrict)
+  events      ApplicationStatusEvent[]
+
+  @@unique([userId, jobId])
+  @@index([userId, appliedAt])
+  @@index([userId, status, updatedAt])
+  @@index([jobId, status])
+  @@map("applications")
+}
+
+model ApplicationStatusEvent {
+  id            String            @id @default(cuid())
+  applicationId String
+  status        ApplicationStatus
+  occurredAt    DateTime
+  createdAt     DateTime          @default(now())
+  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@unique([applicationId, status])
+  @@index([applicationId, occurredAt])
+  @@map("application_status_events")
+}
