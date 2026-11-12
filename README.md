@@ -42,7 +42,7 @@ Open `/dashboard` while logged out: it redirects to login. Create an account at 
 
 Open **My profile**, edit your headline/experience, select skills, and save. Reload to confirm the changes remain. Upload a resume, open it, replace it, and remove it. An anonymous visit to `/profile` redirects to login.
 
-Run `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build`. Before the first database test run, apply migrations to the test database:
+Run `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build`. The same checks run in GitHub Actions with PostgreSQL 17. Before the first database test run, apply migrations to the test database:
 
 ```sh
 DATABASE_URL='postgresql://postgres:postgres@127.0.0.1:5432/jobsearch_test?schema=public' npx prisma migrate deploy
@@ -73,8 +73,9 @@ For a repeatable 100% example, use Senior experience, country United States, pre
 
 ## Deployment
 
-Deployment is planned for M7. Set the Neon PostgreSQL URL and a unique production auth secret in the hosting environment, with `BETTER_AUTH_URL` set to the HTTPS demo origin. Apply migrations before starting the app. Never commit real `.env` files. Verify the hosting proxy's client IP headers for database-backed authentication throttling. CI is planned for M6.
+Deployment is planned for M7. Set the Neon PostgreSQL URL and a unique production auth secret in the hosting environment, with `BETTER_AUTH_URL` set to the HTTPS demo origin. Apply migrations before starting the app. Never commit real `.env` files. Verify the hosting proxy's client IP headers for database-backed authentication throttling.
 
 AI prompts, decisions, and validation are recorded in [docs/AI_WORKFLOW.md](docs/AI_WORKFLOW.md).
+The detailed local browser and automated results are recorded in [docs/QA_REPORT.md](docs/QA_REPORT.md).
 
-Known dependency limitation: `uploadthing@7.7.4` brings Effect packages with published audit advisories (one moderate and three high package entries). No forced downgrade or unrelated dependency changes were made in M3; revisit compatible upstream fixes in M6.
+Known dependency limitation: `uploadthing@7.7.4` brings Effect packages with published audit advisories (one moderate and three high package entries). npm proposes an incompatible downgrade to UploadThing 6, so M6 leaves the approved version in place and records the finding for a future compatible upstream fix.

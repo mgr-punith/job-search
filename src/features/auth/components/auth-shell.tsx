@@ -28,9 +28,9 @@ export function AuthShell({
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary-foreground/75">
             Candidate portal
           </p>
-          <h2 className="text-4xl font-semibold tracking-tight text-balance xl:text-5xl">
+          <p className="text-4xl font-semibold tracking-tight text-balance xl:text-5xl">
             A clear path from discovery to application.
-          </h2>
+          </p>
           <p className="text-lg leading-8 text-primary-foreground/80">
             Build your candidate profile, find relevant roles, and follow every
             application from one focused workspace.

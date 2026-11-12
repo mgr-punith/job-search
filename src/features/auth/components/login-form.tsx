@@ -3,21 +3,23 @@
 import { useActionState } from "react";
 
 import { loginAction } from "@/features/auth/actions/auth-actions";
-import { FormMessage, TextField } from "@/features/auth/components/form-fields";
+import { FormMessage, TextField, useAuthErrorFocus } from "@/features/auth/components/form-fields";
 import { SubmitButton } from "@/features/auth/components/submit-button";
 
 export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
   const [state, formAction] = useActionState(loginAction, null);
+  const formRef = useAuthErrorFocus(state);
 
   const emailError = state && !state.ok ? state.fieldErrors?.email?.[0] : undefined;
   const passwordError =
     state && !state.ok ? state.fieldErrors?.password?.[0] : undefined;
 
   return (
-    <form action={formAction} className="space-y-3 sm:space-y-4">
+    <form ref={formRef} action={formAction} className="space-y-3 sm:space-y-4">
       <input name="callbackUrl" type="hidden" value={callbackUrl} />
       <TextField
         autoComplete="email"
+        defaultValue={state && !state.ok ? state.values?.email : undefined}
         error={emailError}
         id="login-email"
         label="Email"

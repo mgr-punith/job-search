@@ -217,13 +217,13 @@ describe("Better Auth integration", () => {
     formData.set("password", "WrongPass123!");
 
     for (let attempt = 0; attempt < 3; attempt += 1) {
-      expect(await runLoginAction(formData, dependencies)).toEqual({
+      expect(await runLoginAction(formData, dependencies)).toMatchObject({
         ok: false,
         error: "Email or password is incorrect.",
       });
     }
 
-    expect(await runLoginAction(formData, dependencies)).toEqual({
+    expect(await runLoginAction(formData, dependencies)).toMatchObject({
       ok: false,
       error: "Too many attempts. Wait a moment and try again.",
     });

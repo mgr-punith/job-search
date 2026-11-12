@@ -6,7 +6,7 @@ type FieldErrors = Record<string, string[] | undefined>;
 
 export type AuthActionResult =
   | { ok: true; data: { redirectTo: string } }
-  | { ok: false; error: string; fieldErrors?: FieldErrors };
+  | { ok: false; error: string; fieldErrors?: FieldErrors; values?: { name?: string; email: string } };
 
 export type AuthActionDependencies = {
   signUp(input: {
@@ -34,6 +34,10 @@ export async function runSignupAction(
   formData: FormData,
   dependencies: AuthActionDependencies,
 ): Promise<AuthActionResult> {
+  const values = {
+    name: stringValue(formData, "name").slice(0, 100),
+    email: stringValue(formData, "email").slice(0, 254),
+  };
   const validation = signupSchema.safeParse({
     name: stringValue(formData, "name"),
     email: stringValue(formData, "email"),
@@ -46,6 +50,7 @@ export async function runSignupAction(
       ok: false,
       error: "Check the highlighted fields.",
       fieldErrors: validation.error.flatten().fieldErrors,
+      values,
     };
   }
 
@@ -75,6 +80,7 @@ export async function runSignupAction(
           : accountCreated
             ? "Your account was created, but profile setup failed. Log in to try again."
             : "We could not create your account. Check your details and try again.",
+      values,
     };
   }
 }
@@ -83,6 +89,7 @@ export async function runLoginAction(
   formData: FormData,
   dependencies: AuthActionDependencies,
 ): Promise<AuthActionResult> {
+  const values = { email: stringValue(formData, "email").slice(0, 254) };
   const validation = loginSchema.safeParse({
     email: stringValue(formData, "email"),
     password: stringValue(formData, "password"),
@@ -93,6 +100,7 @@ export async function runLoginAction(
       ok: false,
       error: "Check the highlighted fields.",
       fieldErrors: validation.error.flatten().fieldErrors,
+      values,
     };
   }
 
@@ -118,6 +126,7 @@ export async function runLoginAction(
           : authenticated
             ? "We could not load your profile. Please try logging in again."
             : "Email or password is incorrect.",
+      values,
     };
   }
 }
