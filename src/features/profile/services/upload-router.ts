@@ -27,6 +27,7 @@ export const resumeRouter = {
       const unusedKey = await replaceCandidateResume(metadata.userId, file);
       await deleteUnusedUpload(unusedKey);
       revalidatePath("/profile");
+      revalidatePath("/jobs", "layout");
       return { name: file.name };
     }),
 } satisfies FileRouter;

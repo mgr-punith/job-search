@@ -4,6 +4,13 @@ import { parseJobSearch } from "@/features/jobs/schemas/search";
 import { buildJobWhere, buildJobsUrl, getPageNumbers } from "@/features/jobs/services/job-filters";
 
 describe("job filters", () => {
+  it("combines the selected role with the existing keyword and location filters", () => {
+    const filters = parseJobSearch({ match: "frontend-developer", location: "India", q: "React" });
+    const where = buildJobWhere(filters);
+    expect(where.AND).toHaveLength(3);
+    expect(JSON.stringify(where)).toContain("front-end");
+    expect(buildJobsUrl(filters, { page: 2 })).toContain("match=frontend-developer");
+  });
   it("keeps keyword and location searches as separate AND conditions", () => {
     const where = buildJobWhere(parseJobSearch({ q: "React", location: "India", type: "FULL_TIME", experience: "MID", company: "nimbus-systems", market: "TECHNOLOGY", benefit: "health-insurance" }));
     expect(where).toMatchObject({ isActive: true, jobType: "FULL_TIME", experienceLevel: "MID", company: { slug: "nimbus-systems" }, market: "TECHNOLOGY", benefits: { some: { benefit: { slug: "health-insurance" } } } });

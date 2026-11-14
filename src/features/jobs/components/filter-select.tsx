@@ -7,10 +7,11 @@ export function FilterSelect({ name, label, value, options }: {
   options: { value: string; label: string }[];
 }) {
   return (
-    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-medium text-muted-foreground">
+    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-foreground/70">
       {label}
       <select
-        className="h-10 w-full rounded-lg border bg-card px-2 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        autoComplete="off"
+        className="h-10 w-full rounded-full border border-foreground/20 bg-card px-3 text-sm text-foreground shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         name={name}
         defaultValue={value}
         onChange={(event) => event.currentTarget.form?.requestSubmit()}

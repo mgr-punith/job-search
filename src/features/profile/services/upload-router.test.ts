@@ -39,5 +39,6 @@ describe("UploadThing resume route", () => {
     expect(mocks.replace).toHaveBeenCalledWith("candidate-1", uploaded);
     expect(mocks.cleanup).toHaveBeenCalledWith("old-key");
     expect(mocks.revalidate).toHaveBeenCalledWith("/profile");
+    expect(mocks.revalidate).toHaveBeenCalledWith("/jobs", "layout");
   });
 });

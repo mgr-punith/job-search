@@ -238,3 +238,105 @@ The tested pages had no horizontal overflow at 320, 390, 768, or 1280 pixels. Li
 ### Milestone boundary
 
 M6 completes local hardening and CI. M7 remains deployment with Neon and production environment variables, followed by the deployed demo check and final submission links.
+
+## Post-M6: Resume upload modal on job pages, 2026-11-13
+
+### Tool and fit
+
+Codex reused the existing UploadThing flow and native dialog component. Chrome DevTools checked real uploads and profile persistence; Vitest, ESLint, TypeScript and the production build checked the code. The installed React best-practices, web-design-guidelines and stop-slop skills guided the component and copy review.
+
+### Prompt and constraints
+
+> when the upload resume clicked , the pop up should come and then it will be easy to upload, updated resume make that modal to upload the resume and it should updated in profile as well
+
+> http://localhost:3000/jobs/learnly-frontend-engineer in this type of pages
+
+The user supplied the job-detail context, requested an upload/update dialog, and required the same file to update the profile. Earlier instructions authorised local browser testing, required local PostgreSQL for testing and Neon for production, and prohibited secrets in Git. The stop condition was a verified resume dialog; this follow-up did not authorise a commit or push.
+
+### Output and decisions
+
+The shared application panel now opens Upload resume or Update resume in a dialog on job pages. The dialog shows the current file, accepts PDF/DOC/DOCX up to 4 MB, displays validation and upload progress, and confirms a saved upload. A shared upload form serves both this dialog and the profile page. The authenticated UploadThing callback still saves the profile file and retains resumes referenced by existing applications; it now invalidates job pages alongside the profile. A router refresh displays the new resume for the next application.
+
+### Issues and review
+
+The uploader sits outside the application form to avoid nested forms. Each uploader uses a unique input id; invalid submissions focus the file input. Success requires UploadThing's server response so the client cannot report completion before the callback saves the profile. The dialog prevents dismissal during upload. First uploads refresh the missing-resume panel into the application form; replacements retain the dialog's confirmation until Done. Review found no remaining blockers for this request. The earlier Greenhouse-inspired redesign remains a separate paused work item with its broader QA unfinished.
+
+### Verification and manual check
+
+All 158 tests in 29 files pass; lint, strict typecheck, the production build and Git whitespace checks pass. The UploadThing route test now asserts invalidation of both profile and job routes. Existing integration tests continue to verify ownership and submitted-resume snapshot retention.
+
+Chrome testing used a separate QA candidate and synthetic files. Empty selection and an unsupported file showed errors. A real first upload enabled Apply now on the Learnly job page; a replacement updated the displayed application filename and persisted after opening the profile. The modal fit 320px and 390px viewports without horizontal overflow. Escape closed the dialog and returned focus to Update resume. The page contained no nested forms, and console checks reported no warnings or errors. The user's demo candidate and resume were preserved.
+
+To check manually, log in, open a job you have not applied to, choose Upload resume or Update resume, upload a supported file, and open Profile. Both pages should show that file; existing applications should retain their submitted resume.
+
+## Post-M6: Developer jobs, compact discovery and AI profile suggestions, 2026-11-13
+
+### Tool and prompt
+
+Codex used Next.js Server Actions, Prisma, Zod and Vitest without a new dependency. Groq's free API drafts profile text through server-side `fetch`. The user watched the live flow in a visible Chrome debugging window. The installed React best-practices, web-design-guidelines and stop-slop skills guided review.
+
+> first we will add like Web Developer, Front end Developer, Backend developer, job at least 5
+
+> the ai should ask do you know this skill, if said no, then we will not add that skill and make the better profile for the user
+
+> website looks very large
+
+The user confirmed “Replace Benefits with Profile match” and asked to include software-engineering and other related roles. These requests authorised optional AI profile suggestions beyond the original assignment. The expected output was five developer jobs, a smaller layout, role/profile filtering and a reviewed AI draft. Testing stayed on local PostgreSQL, and no commit or push was requested.
+
+### Output and decisions
+
+The seed provides 45 jobs, adding Web Developer, Frontend Developer, Backend Developer, Software Engineer and Full Stack Developer. The `--jobs-only` option preserves the demo candidate's edited profile. The jobs hero, header, card and detail spacing are smaller. Profile match offers developer, design, data and product roles, plus Matches my profile (70%+) for signed-in candidates. URL filters use the existing pure score before pagination so counts and later pages agree. Existing Benefits URLs still work.
+
+Candidates open Improve profile with AI from a job or select a preferred job on Profile. The server asks Yes/No for required skills missing from the session candidate's saved profile, then sends the headline, bio, experience and confirmed skill names to Groq. It omits contact data and resume files. No answers remain learning suggestions. The candidate edits/reviews the draft and chooses Save profile improvements; the server changes only headline, bio and confirmed skills. Revision checks reject stale drafts, and existing application scores/resumes stay unchanged.
+
+### Issues and review
+
+The first real Groq response for an empty QA profile invented graduation and personal projects. Codex strengthened the prompt, added checks for common unsupported education, project, certification and leadership claims, and retries once on generated validation failures. The next response used only the confirmed skills and interest in an entry-level role. Denied skill names are checked in generated/edited text and excluded from saved skills. A regression test covers the live finding. These checks reduce errors; candidates must still review model text because the checks cannot prove every statement.
+
+Codex completed the paused detail-component integration and isolated Server Actions in component tests. The review checked validation, session ownership, errors, unique labels, native radio/button semantics, atomic writes and preservation of other profile fields. Browser checks measured actual mobile dimensions.
+
+### Verification
+
+All 190 tests in 33 files, lint, strict typecheck and the final production build pass. New coverage includes complete/duplicate/forged skill answers, denied skills, quota/invalid output, authentication, stale revisions, owner-scoped atomic saves, retained resume/profile fields, role filtering and matches before pagination. The jobs-only seed created 45 local jobs; the user's demo profile and resume were preserved. `.env` remains ignored by Git.
+
+Visible Chrome testing used a separate QA candidate. For Learnly Frontend Developer, Yes answers covered React/TypeScript and No answers covered Next.js/Vitest. Groq produced a corrected draft; saving and reloading Profile retained only the confirmed skills and the existing resume. The job score rose from 10% to 50%; the 70% filter correctly showed an empty result. Backend Developer returned two roles; Web Developer returned its new job. The preferred-job picker listed 45 jobs. The popup fit 320px/390px without horizontal overflow, and mobile discovery fit 390px. Console checks on the inspected discovery route were clean.
+
+Manual check: choose a developer role, open its job, choose Improve profile with AI, answer each skill question, review/edit and save. Open Profile to confirm the text and Yes skills; use Matches my profile to see the updated scores. Free API quota and model availability remain provider limits; manual editing works without AI setup.
+
+## Post-M6: Navigation caching, pagination and motion, 2026-11-14
+
+### Tool and prompt
+
+Codex used the installed Next.js 16.4.6 documentation, Vercel React performance guidance, web interface guidelines and stop-slop. Vitest checked regressions; a Chrome debugging script tested the production build in a visible window without an additional browser-testing dependency.
+
+> can you add cache or some optimization for this so that i cant see that loading each time when i change route
+
+> when i click on next page from pagination i am getting this whole page reload, fix this as well
+
+> add some loading and little animation for the site , so looks real smooth
+
+The user required smoother route changes, pagination without a page flash, and modest loading feedback. Existing constraints kept testing on local PostgreSQL, preserved candidate/application freshness, and required approval for dependencies and publication. The stop condition was a verified navigation fix.
+
+### Output and decisions
+
+Recent dynamic page visits remain in the browser router cache for 30 seconds. Public job pages/details, filter options, skills and AI job choices use Next.js's minutes cache profile: a one-minute server revalidation interval and five-minute cached-content stale time. Session reads deduplicate within a request; profile, resume and application data retain their existing ownership checks and request-time queries. Removing a resume also invalidates job application panels. Status persistence waits for navigation, so link prefetches do not advance applications.
+
+The jobs route now places its browser component behind an unkeyed Suspense boundary. Pagination preserves the document scroll position and prefetches linked pages. The search form retains its identity across pagination; keyword/filter changes use a transition with a Searching… state. A delayed thin progress bar indicates navigation that takes time. Page skeletons, brief content fades and a dialog entrance use CSS; reduced-motion preferences disable the new motion. No dependency was added.
+
+### Review and verification
+
+All 195 tests in 35 files pass, along with lint, strict typecheck, the production build and Git whitespace checks. Regression tests cover pagination filters, cleared job selection, pending feedback and resume-removal invalidation. Existing suites cover authentication, profile ownership, duplicate applications, resume snapshots, job filtering, matching and the 90% status rule.
+
+Visible Chrome tested the local production build at port 3002 with a separate QA candidate. Under 450ms network latency, pagination retained the header node and scroll position at 240px, displayed progress and showed no page skeleton or document request. Returning to visited pages produced no RSC requests. Browser Back, React keyword search and Frontend Developer filtering worked. Warm Profile and Jobs navigation avoided the loading screen; a first visit can still show its skeleton.
+
+A profile headline save appeared after navigating away and back. Applying created a QA application, updated the dashboard and replaced Apply now with View application. The below-90% timeline refreshed to Under review and retained its submitted resume. Logout returned to login, and a protected profile visit required authentication. The resume modal retained its upload input, animated on opening, closed with Escape and contained no nested forms. At 390px there was no horizontal overflow; reduced motion yielded no main animation and normal scrolling. The user's candidate/resume and env secrets were preserved. No commit or push was requested.
+
+Manual check: open Jobs, scroll to pagination, choose Next and Previous, then use Back. The page should keep its position and update the cards/detail. Search or change a filter to see pending feedback. Save Profile, return through Jobs, and confirm the edit; apply and check Applications. Cold visits and expired caches can still load, and development mode includes compiler overhead with less prefetching than production.
+
+## Post-M6: GitHub publication verification, 2026-11-14
+
+Codex reviewed the accumulated interface, resume upload, developer job, AI profile and navigation updates for publication. The user's initial prompt was “push all the things to github and i wanna see deployed version of this project.” The user then narrowed the task: “no need i will do it / you just push to github.” The final scope is to commit and push the existing work; the user will handle deployment.
+
+Fresh verification passed: lint with zero warnings, strict TypeScript, all 195 tests in 35 files, the production build, and Git whitespace checks. Review covered session caching, candidate ownership, AI draft validation and atomic saves, resume invalidation, and job filtering. A credential-pattern scan of publishable files found no matches; `.env.example` is the only environment file eligible for Git. Existing browser verification is recorded in the preceding entries and `docs/QA_REPORT.md`.
+
+No application code or dependencies were added during publication verification. No hosted application or database was created. M7 deployment remains with the user; this entry does not claim a live demo is available.

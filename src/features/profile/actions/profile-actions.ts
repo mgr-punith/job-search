@@ -31,6 +31,9 @@ export async function saveProfileAction(_state: ProfileActionResult | null, form
 
 export async function removeResumeAction() {
   const result = await runRemoveResume(dependencies());
-  if (result.ok) revalidatePath("/profile");
+  if (result.ok) {
+    revalidatePath("/profile");
+    revalidatePath("/jobs", "layout");
+  }
   return result;
 }

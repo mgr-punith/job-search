@@ -52,11 +52,23 @@ Development uses Turbopack. Production builds use Next.js's webpack option becau
 
 ## Verify job discovery
 
-Open `/jobs` without logging in. The seed supplies 40 roles across 10 companies. Search by title, company, or skill; combine that with a city, country, or time-zone offset such as `UTC+05:30`. Choose experience level, company, job type, salary, market, or benefits to narrow the results. Salary filters match overlapping annual USD ranges.
+Open `/jobs` without logging in. The seed supplies 45 roles across 10 companies, including Web Developer, Frontend Developer, Backend Developer, Software Engineer and Full Stack Developer. Search by title, company, or skill; combine that with a city, country, or time-zone offset such as `UTC+05:30`. Choose experience level, company, job type, salary, market, or a role under **Profile match** to narrow the results. Signed-in candidates can choose **Matches my profile (70%+)**, using the same score as job details. Salary filters match overlapping annual USD ranges. Existing Benefits URLs still work.
 
 Searches and filters live in the URL. Dropdown changes submit the current search and reset pagination. Results show eight jobs per page, ordered by last update, with stable ties. Reload or use the browser's Back button to restore a search; **Clear** returns to all jobs.
 
 On desktop, select a job card to change the detail panel. On mobile, the card opens a separate detail page with a **Back to jobs** link that retains your filters. Try `React` with `Senior level` for the Northstar Labs role, and a nonexistent keyword for the empty state. Direct links to missing or closed jobs show an unavailable message.
+
+## AI profile suggestions (optional)
+
+Create a key at [Groq Console](https://console.groq.com/keys). Set `GROQ_API_KEY` in your local `.env`; `GROQ_MODEL` defaults to `openai/gpt-oss-20b`. Restart the dev server after changing environment settings. Groq offers a quota-limited free tier; provider availability and limits can change. No SDK dependency is required.
+
+Choose **Improve profile with AI** on a job, or open the same popup from Profile and choose a preferred job. Save manual profile changes first. The popup asks Yes/No for job skills missing from your saved profile. Only Yes answers add skills; No answers appear as skills to learn. Groq receives the saved headline, bio, experience and confirmed skill names, without contact details or resume files. Review/edit the generated headline and bio before choosing **Save profile improvements**. Validation rejects denied skill names and common unsupported education/project claims. Review remains necessary because model output can be inaccurate. Saving changes only the headline, bio and confirmed skills, and refuses an old draft if your profile changed. Existing application snapshots remain unchanged.
+
+To refresh seeded jobs without resetting an edited demo profile:
+
+```sh
+node --experimental-strip-types prisma/seed.ts --jobs-only
+```
 
 ## Apply and track progress
 
@@ -68,6 +80,8 @@ On desktop, select a job card to change the detail panel. On mobile, the card op
 The matching function awards up to 70 points for the fraction of required skills matched; 20 for meeting/exceeding the experience level, 10 for being one level below, otherwise 0; 5 for the same country or explicitly worldwide remote work; and 5 for a matching preferred market. It rounds the total to a whole percentage. No listed job skills earns zero skill points. Both the job badge and application use this function.
 
 Scores of 90% or more progress from **Applied → Under review → Shortlisted → Interview scheduled**, one configured delay per transition. Lower scores stay **Under review**, as chosen for this assignment. The demo interview date is deterministic from the application id, four to six days after submission. This is a simulation; no real recruiter or meeting is involved. The app advances status on page reads and refreshes, without a cron job or queue.
+
+Navigation reuses recent pages for 30 seconds and caches public job/reference queries with one-minute server revalidation. Profile/resume/application mutations invalidate affected routes; status refresh bypasses the router cache. Pagination preserves scroll and shows a thin progress bar during slower transitions. First visits can still show a skeleton. Automatic prefetching works in production; development includes compilation delays. Motion respects reduced-motion preferences.
 
 For a repeatable 100% example, use Senior experience, country United States, preferred market Healthcare, and skills TypeScript, React, Node.js, PostgreSQL, and Prisma. Apply to **MediSpring — Full Stack Engineer** after uploading a resume. Try **WellNest Health — Implementation Specialist** with that same profile to see the lower-score path. Use a fresh candidate for repeated demos because duplicate applications are blocked.
 

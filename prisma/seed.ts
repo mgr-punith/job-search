@@ -197,6 +197,18 @@ const benefits = [
 ] as const;
 
 const jobs: JobSeed[] = [
+  ...[
+    { slug: "nimbus-web-developer", title: "Web Developer", companySlug: "nimbus-systems", mission: "build responsive customer websites and accessible web tools", skillSlugs: ["typescript", "react", "next-js", "design-systems"] },
+    { slug: "learnly-frontend-developer", title: "Frontend Developer", companySlug: "learnly", mission: "build fast learning interfaces with React and TypeScript", skillSlugs: ["typescript", "react", "next-js", "vitest"] },
+    { slug: "ledgerleaf-backend-developer", title: "Backend Developer", companySlug: "ledgerleaf", mission: "develop reliable APIs and PostgreSQL services for finance workflows", skillSlugs: ["typescript", "node-js", "postgresql", "prisma"] },
+    { slug: "northstar-software-engineer", title: "Software Engineer", companySlug: "northstar-labs", mission: "deliver maintainable software for collaborative planning", skillSlugs: ["typescript", "react", "node-js", "postgresql", "vitest"] },
+    { slug: "cartwheel-full-stack-developer", title: "Full Stack Developer", companySlug: "cartwheel-commerce", mission: "build storefront features from React interfaces to database services", skillSlugs: ["typescript", "react", "next-js", "node-js", "postgresql", "prisma"] },
+  ].map((role): JobSeed => ({
+    ...role, family: "engineering", location: "Remote, worldwide", country: "Worldwide", timeZone: "Flexible / worldwide",
+    workplaceType: WorkplaceType.REMOTE, jobType: JobType.FULL_TIME, experienceLevel: ExperienceLevel.MID,
+    market: Market.TECHNOLOGY, salaryMin: 60_000, salaryMax: 100_000,
+    benefitSlugs: ["remote-work", "flexible-hours", "learning-budget"], isActivelyRecruiting: true, publishedDaysAgo: 0,
+  })),
   {
     slug: "northstar-senior-frontend-engineer",
     title: "Senior Frontend Engineer",
@@ -1123,7 +1135,7 @@ async function seed() {
       });
     }
 
-    for (const job of jobs) {
+    for (const job of jobs.toSorted((a, b) => Number(a.publishedDaysAgo === 0) - Number(b.publishedDaysAgo === 0))) {
       const company = companyBySlug.get(job.companySlug);
 
       if (!company) {
@@ -1204,73 +1216,77 @@ async function seed() {
       });
     }
 
-    const demoUser = await db.user.upsert({
-      where: { email: DEMO_CANDIDATE_EMAIL },
-      create: {
-        name: "Jordan Lee",
-        email: DEMO_CANDIDATE_EMAIL,
-        emailVerified: false,
-      },
-      update: {
-        name: "Jordan Lee",
-      },
-    });
-
-    const demoCredential = await buildCredentialAccountData(
-      demoUser.id,
-      DEMO_CANDIDATE_PASSWORD,
-    );
-
-    await db.account.upsert({
-      where: {
-        providerId_accountId: {
-          providerId: demoCredential.providerId,
-          accountId: demoCredential.accountId,
+    // Allow refreshing assignment jobs without changing the reviewer's edited demo profile.
+    if (!process.argv.includes("--jobs-only")) {
+      const demoUser = await db.user.upsert({
+        where: { email: DEMO_CANDIDATE_EMAIL },
+        create: {
+          name: "Jordan Lee",
+          email: DEMO_CANDIDATE_EMAIL,
+          emailVerified: false,
         },
-      },
-      create: demoCredential,
-      update: { password: demoCredential.password },
-    });
+        update: {
+          name: "Jordan Lee",
+        },
+      });
 
-    await db.candidateProfile.upsert({
-      where: { userId: demoUser.id },
-      create: {
-        userId: demoUser.id,
-        headline: "Full-stack engineer building reliable web products",
-        phone: "+1 555 010 2040",
-        location: "New York, United States",
-        country: "United States",
-        timeZone: "UTC-05:00",
-        yearsExperience: 6,
-        experienceLevel: ExperienceLevel.SENIOR,
-        bio: "Product-minded engineer with experience across TypeScript, React, Node.js, PostgreSQL, and cloud delivery.",
-        preferredMarkets: [Market.TECHNOLOGY, Market.FINTECH],
-        preferredWorkplaceTypes: [WorkplaceType.REMOTE, WorkplaceType.HYBRID],
-        skills: {
-          create: ["typescript", "react", "next-js", "node-js", "postgresql", "aws"].map(
-            (slug) => ({ skill: { connect: { slug } } }),
-          ),
+      const demoCredential = await buildCredentialAccountData(
+        demoUser.id,
+        DEMO_CANDIDATE_PASSWORD,
+      );
+
+      await db.account.upsert({
+        where: {
+          providerId_accountId: {
+            providerId: demoCredential.providerId,
+            accountId: demoCredential.accountId,
+          },
         },
-      },
-      update: {
-        headline: "Full-stack engineer building reliable web products",
-        phone: "+1 555 010 2040",
-        location: "New York, United States",
-        country: "United States",
-        timeZone: "UTC-05:00",
-        yearsExperience: 6,
-        experienceLevel: ExperienceLevel.SENIOR,
-        bio: "Product-minded engineer with experience across TypeScript, React, Node.js, PostgreSQL, and cloud delivery.",
-        preferredMarkets: [Market.TECHNOLOGY, Market.FINTECH],
-        preferredWorkplaceTypes: [WorkplaceType.REMOTE, WorkplaceType.HYBRID],
-        skills: {
-          deleteMany: {},
-          create: ["typescript", "react", "next-js", "node-js", "postgresql", "aws"].map(
-            (slug) => ({ skill: { connect: { slug } } }),
-          ),
+        create: demoCredential,
+        update: { password: demoCredential.password },
+      });
+
+      await db.candidateProfile.upsert({
+        where: { userId: demoUser.id },
+        create: {
+          userId: demoUser.id,
+          headline: "Full-stack engineer building reliable web products",
+          phone: "+1 555 010 2040",
+          location: "New York, United States",
+          country: "United States",
+          timeZone: "UTC-05:00",
+          yearsExperience: 6,
+          experienceLevel: ExperienceLevel.SENIOR,
+          bio: "Product-minded engineer with experience across TypeScript, React, Node.js, PostgreSQL, and cloud delivery.",
+          preferredMarkets: [Market.TECHNOLOGY, Market.FINTECH],
+          preferredWorkplaceTypes: [WorkplaceType.REMOTE, WorkplaceType.HYBRID],
+          skills: {
+            create: ["typescript", "react", "next-js", "node-js", "postgresql", "aws"].map(
+              (slug) => ({ skill: { connect: { slug } } }),
+            ),
+          },
         },
-      },
-    });
+        update: {
+          headline: "Full-stack engineer building reliable web products",
+          phone: "+1 555 010 2040",
+          location: "New York, United States",
+          country: "United States",
+          timeZone: "UTC-05:00",
+          yearsExperience: 6,
+          experienceLevel: ExperienceLevel.SENIOR,
+          bio: "Product-minded engineer with experience across TypeScript, React, Node.js, PostgreSQL, and cloud delivery.",
+          preferredMarkets: [Market.TECHNOLOGY, Market.FINTECH],
+          preferredWorkplaceTypes: [WorkplaceType.REMOTE, WorkplaceType.HYBRID],
+          skills: {
+            deleteMany: {},
+            create: ["typescript", "react", "next-js", "node-js", "postgresql", "aws"].map(
+              (slug) => ({ skill: { connect: { slug } } }),
+            ),
+          },
+        },
+      });
+
+    }
 
     const [companyCount, jobCount, skillCount, benefitCount, candidateCount] =
       await Promise.all([

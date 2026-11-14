@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { saveProfileAction } from "@/features/profile/actions/profile-actions";
 import { profileSchema, type ProfileInput } from "@/features/profile/schemas/profile";
 
-const inputStyle = "mt-1.5 min-h-11 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/25 aria-invalid:border-destructive";
+const inputStyle = "mt-1.5 min-h-11 w-full rounded-xl border bg-white px-3.5 py-2 text-sm outline-none transition-[border-color,box-shadow] focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/25 aria-invalid:border-destructive";
 
 type FieldProps = ComponentProps<"input"> & { label: string; error?: string };
 
@@ -22,8 +22,8 @@ function Field({ label, error, id, ...props }: FieldProps) {
 
 function Section({ title, description, children }: { title: string; description: string; children: ReactNode }) {
   return (
-    <section className="rounded-xl border bg-card p-5 sm:p-6">
-      <h2 className="text-lg font-semibold">{title}</h2>
+    <section className="rounded-2xl border border-foreground/10 bg-card p-5 shadow-[0_12px_40px_rgb(18_61_50/0.045)] sm:p-7">
+      <h2 className="font-serif text-2xl">{title}</h2>
       <p className="mt-1 text-sm text-muted-foreground">{description}</p>
       <div className="mt-5 grid gap-5 sm:grid-cols-2">{children}</div>
     </section>
@@ -108,7 +108,7 @@ export function ProfileForm({ initialValues, email, availableSkills }: {
             {values.skillIds.map((id) => <input key={id} type="hidden" name="skillIds" value={id} />)}
             <div className="mt-3 flex max-h-56 flex-wrap gap-2 overflow-y-auto p-1" role="group" aria-label="Skills">
               {availableSkills.filter((skill) => skill.name.toLowerCase().includes(skillSearch.trim().toLowerCase())).map((skill) => (
-                <label key={skill.id} className="flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm has-checked:border-primary has-checked:bg-primary/5 has-focus-visible:ring-2 has-focus-visible:ring-ring">
+                <label key={skill.id} className="flex cursor-pointer items-center gap-2 rounded-full border border-foreground/20 px-3 py-2 text-sm transition-colors has-checked:border-primary has-checked:bg-secondary has-checked:text-primary has-focus-visible:ring-2 has-focus-visible:ring-ring">
                   <input className="accent-primary" type="checkbox" checked={values.skillIds.includes(skill.id)} disabled={!values.skillIds.includes(skill.id) && values.skillIds.length >= 30} onChange={() => update("skillIds", toggle(values.skillIds, skill.id))} />
                   {skill.name}
                 </label>
@@ -127,7 +127,7 @@ export function ProfileForm({ initialValues, email, availableSkills }: {
           </div></fieldset>
         </Section>
       </fieldset>
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-card p-5">
+      <div className="sticky bottom-4 z-20 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-foreground/10 bg-card/95 p-5 shadow-[0_14px_45px_rgb(18_61_50/0.12)] backdrop-blur">
         <p role="status" className={state && !state.ok ? "text-sm text-destructive" : "text-sm text-muted-foreground"}>
           {Object.keys(clientErrors).length ? "Check the highlighted fields." : state?.ok ? state.data.message : state?.error ?? "Save your changes before leaving this page."}
         </p>

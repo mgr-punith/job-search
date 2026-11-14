@@ -1,5 +1,9 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("@/features/profile/actions/profile-ai-actions", () => ({
+  prepareProfileAiAction: vi.fn(), generateProfileAiAction: vi.fn(), saveProfileAiAction: vi.fn(),
+}));
 
 import { JobDetail } from "@/features/jobs/components/job-detail";
 import type { JobDetailData } from "@/features/jobs/queries/jobs";

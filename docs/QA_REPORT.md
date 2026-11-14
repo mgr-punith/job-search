@@ -1,5 +1,22 @@
 # M6 QA Report
 
+## Navigation and motion follow-up, 14 November 2026
+
+- Local production Chrome QA verified pagination under 450ms added network latency: zero document reloads, no full-page loading flash, retained header and unchanged document scroll at 240px. Warm page changes used the client cache with zero RSC requests; Back worked.
+- Keyword search and Frontend Developer filtering returned the expected roles. Warm Profile/Jobs routes avoided skeletons; first visits still show loading UI when data is unavailable.
+- Saved QA profile text appeared after return navigation. A new application appeared on the dashboard and updated the job's application panel. Refresh status showed Under review and retained the submitted resume. Logout and protected-profile redirects passed.
+- The resume dialog animated, retained its file input, closed with Escape and had no nested forms. The 390px viewport had no horizontal overflow; reduced-motion mode disabled the new animation and smooth scrolling.
+- Verification: 195 tests in 35 files, lint, strict typecheck, production build and whitespace checks passed. No new dependency, commit or push. Local PostgreSQL served this QA; production will use Neon. Earlier real-upload and AI tests remain recorded below.
+
+## Post-M6 follow-up, 13 November 2026
+
+- Added 5 developer jobs for a total of 45, with a jobs-only seed that preserves the demo profile. Compact discovery renders search/filters and job content higher in the viewport.
+- Profile match replaces the Benefits dropdown. Frontend, backend and web role choices returned relevant jobs in Chrome. The 70% profile option uses the same score before pagination; database tests verify counts/later pages and the no-match state.
+- Real Groq testing in a visible Chrome window used a separate QA candidate. Yes to React/TypeScript and No to Next.js/Vitest produced a reviewed draft and saved only the confirmed skills. Profile reload retained the new text and existing resume; score rose from 10% to 50%.
+- The first real draft invented graduation/projects. Prompt constraints, common-claim validation, one retry and a regression test address that finding. Candidate review remains required; semantic accuracy is not guaranteed by the checks.
+- The profile popup fit actual 320px and 390px viewports, without horizontal overflow or nested forms. Discovery fit 390px. Console checks on the inspected discovery route were clean.
+- Final verification: 190 tests in 33 files, lint, typecheck, production build and whitespace checks passed. `.env` remains ignored; no commit/push. This follow-up does not claim the separate paused redesign's entire QA checklist is complete.
+
 Tested locally on 12 November 2026 with PostgreSQL, Next.js development and production builds, Chrome DevTools, Vitest, ESLint, TypeScript, and Lighthouse.
 
 ## Assignment flows

@@ -50,3 +50,16 @@ const simulationEnvironmentSchema = z.object({
 export function parseSimulationEnvironment(environment: Record<string, string | undefined>) {
   return simulationEnvironmentSchema.parse(environment);
 }
+
+const profileAiEnvironmentSchema = z.object({
+  GROQ_API_KEY: z.string().trim().min(1).refine((value) => !value.startsWith("replace-") && !value.startsWith("YOUR_")),
+  GROQ_MODEL: z.string().trim().min(1).max(120).default("openai/gpt-oss-20b"),
+});
+
+export function parseProfileAiEnvironment(environment: Record<string, string | undefined>) {
+  return profileAiEnvironmentSchema.parse(environment);
+}
+
+export function isProfileAiConfigured() {
+  return profileAiEnvironmentSchema.safeParse(process.env).success;
+}
