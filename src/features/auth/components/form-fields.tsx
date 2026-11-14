@@ -49,7 +49,7 @@ export function TextField({
         aria-invalid={error ? true : undefined}
         autoComplete={autoComplete}
         defaultValue={defaultValue}
-        className="h-10 w-full rounded-lg border bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 aria-invalid:border-destructive aria-invalid:ring-destructive/20 sm:h-11"
+        className="h-11 w-full rounded-xl border bg-white px-3.5 text-sm outline-none transition-[border-color,box-shadow] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 aria-invalid:border-destructive aria-invalid:ring-destructive/20"
         id={id}
         name={name}
         required

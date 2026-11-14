@@ -3,6 +3,11 @@ import { describe, expect, it } from "vitest";
 import { parseJobSearch } from "@/features/jobs/schemas/search";
 
 describe("job search parameters", () => {
+  it("validates role and profile matching choices", () => {
+    expect(parseJobSearch({ match: "frontend-developer" }).match).toBe("frontend-developer");
+    expect(parseJobSearch({ match: "profile" }).match).toBe("profile");
+    expect(parseJobSearch({ match: "unknown" }).match).toBe("");
+  });
   it("normalizes search text and repeated URL params", () => {
     expect(parseJobSearch({ q: ["  React  ", "ignored"], location: " India ", page: "2", experience: "SENIOR" })).toMatchObject({ q: "React", location: "India", page: 2, experience: "SENIOR" });
   });

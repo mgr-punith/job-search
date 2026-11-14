@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   cacheComponents: true,
   partialPrefetching: true,
+  experimental: {
+    // Reuse recent visits; server actions and router.refresh still invalidate the client cache.
+    staleTimes: { dynamic: 30 },
+  },
   async headers() {
     return [{
       source: "/:path*",

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { ExperienceLevel, JobType, Market } from "@/generated/prisma/enums";
+import { preferredRoles } from "@/features/jobs/services/preferred-roles";
 
 export const salaryRanges = {
   "0-50": { label: "Up to $50,000", min: 0, max: 50_000 },
@@ -21,6 +22,7 @@ const jobSearchSchema = z.object({
   salary: z.enum(["0-50", "50-100", "100-150", "150-plus"]).or(z.literal("")).catch(""),
   market: z.enum(Market).or(z.literal("")).catch(""),
   benefit: optionalSlug,
+  match: z.enum(["profile", ...Object.keys(preferredRoles)]).or(z.literal("")).catch(""),
   page: z.coerce.number().int().min(1).max(10_000).catch(1),
   job: optionalSlug,
 });

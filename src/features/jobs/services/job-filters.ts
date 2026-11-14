@@ -1,5 +1,6 @@
 import { type JobSearch, salaryRanges } from "@/features/jobs/schemas/search";
 import type { Prisma } from "@/generated/prisma/client";
+import { preferredRoles } from "@/features/jobs/services/preferred-roles";
 
 export const JOBS_PER_PAGE = 8;
 
@@ -24,6 +25,8 @@ export function buildJobWhere(filters: JobSearch): Prisma.JobWhereInput {
     const contains = literalContains(filters.location);
     and.push({ OR: [{ location: contains }, { country: contains }, { timeZone: contains }] });
   }
+  const role = preferredRoles[filters.match as keyof typeof preferredRoles];
+  if (role) and.push({ OR: role.titles.map((title) => ({ title: literalContains(title) })) });
   if (and.length) where.AND = and;
   if (filters.experience) where.experienceLevel = filters.experience;
   if (filters.company) where.company = { slug: filters.company };

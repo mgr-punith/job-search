@@ -1,4 +1,6 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+
+vi.mock("next/cache", () => ({ cacheLife: vi.fn() }));
 
 import { parseJobSearch } from "@/features/jobs/schemas/search";
 import { getTestDatabaseUrl } from "@/lib/test-database";
@@ -42,6 +44,16 @@ beforeAll(async () => {
 afterAll(async () => { await cleanup(); await db.$disconnect(); });
 
 describe("job discovery database queries", () => {
+  it("matches roles and computes profile matches before paginating", async () => {
+    const roleResults = await getJobs(parseJobSearch({ company: companyId, match: "frontend-developer" }));
+    expect(roleResults.total).toBe(9);
+    const candidate = { experienceLevel: "SENIOR" as const, country: "India", preferredMarkets: ["TECHNOLOGY" as const], skills: [{ skillId }] };
+    const filters = parseJobSearch({ company: companyId, match: "profile" });
+    expect((await getJobs(filters, candidate)).total).toBe(10);
+    expect((await getJobs({ ...filters, page: 2 }, candidate)).jobs).toHaveLength(2);
+    expect((await getJobs(filters, { ...candidate, skills: [] })).total).toBe(0);
+    expect((await getJobs(filters)).total).toBe(0);
+  });
   it("combines skill, location, company and every dropdown filter", async () => {
     const result = await getJobs(parseJobSearch({
       q: "typescript", location: "india", company: companyId, experience: "SENIOR", type: "FULL_TIME",
